@@ -1,0 +1,1 @@
+CURVE = ['Circle', 'Square', 'Arrow', 'Cube', 'Sphere', 'Star']
