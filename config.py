@@ -1,1 +1,1 @@
-CURVE = ['Circle', 'Square', 'Arrow', 'Cube', 'Sphere', 'Star']
+CURVE = ['Circle', 'Square', 'Arrow1', 'Arrow2', 'Arrow3', 'Cube', 'Sphere', 'Star']

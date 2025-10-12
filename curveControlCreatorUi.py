@@ -8,21 +8,50 @@ import maya.OpenMayaUI as omui
 import importlib
 
 from . import config
+from . import curveControlCreatorUtil as ccutil
 importlib.reload(config)
+importlib.reload(ccutil)
 
 class CurveControlCreator(QtWidgets.QDialog):
 	def __init__(self, parent=None):
 		super().__init__(parent)
 
 		self.setWindowTitle('Curve Control Creator💫')
-		self.resize(400,300)
+		self.resize(400,200)
 
 		self.mainLayout = QtWidgets.QVBoxLayout()
 		self.setLayout(self.mainLayout)
+		self.setStyleSheet(
+			'''
+				QDialog{
+					background-color: #4c493e;
+				}
+				QLabel{
+					color: White;
+				}
+				QCheckBox{
+					color: White;
+				}
+				QRadioButton{
+					color: White;
+				}
+			
+			'''
+		)
 
 		self.nameLayout = QtWidgets.QHBoxLayout()
 		self.nameLabel = QtWidgets.QLabel('Name:')
 		self.nameLineEdit = QtWidgets.QLineEdit()
+		self.nameLineEdit.setStyleSheet(
+			'''
+				QLineEdit {
+					background-color: #a4d9d5;
+					color: Black;
+					border-radius: 8px;
+				}
+			'''
+		)
+
 		self.suffixLabel = QtWidgets.QLabel('_ctrl')
 		self.nameLayout.addWidget(self.nameLabel)
 		self.nameLayout.addWidget(self.nameLineEdit)
@@ -34,21 +63,30 @@ class CurveControlCreator(QtWidgets.QDialog):
 		self.shapeCombo = QtWidgets.QComboBox()
 		self.shapeCombo.addItems(config.CURVE)
 		self.shapeCombo.setFixedWidth(400)
+		self.shapeCombo.setStyleSheet(
+			'''
+				QComboBox {
+					background-color: #ffdf62;
+					color: Black;
+				}
+			'''
+		)
+
 		self.shapeLayout.addWidget(self.shapeLabel)
 		self.shapeLayout.addWidget(self.shapeCombo)
 		self.mainLayout.addLayout(self.shapeLayout)
 
-		self.orientLayout = QtWidgets.QHBoxLayout()
-		self.orientLabel = QtWidgets.QLabel('Orientation:')
-		self.xyRadio = QtWidgets.QRadioButton('XY')
-		self.yzRadio = QtWidgets.QRadioButton('YZ')
-		self.xzRadio = QtWidgets.QRadioButton('XZ')
-		self.xyRadio.setChecked(True)
-		self.orientLayout.addWidget(self.orientLabel)
-		self.orientLayout.addWidget(self.xyRadio)
-		self.orientLayout.addWidget(self.yzRadio)
-		self.orientLayout.addWidget(self.xzRadio)
-		self.mainLayout.addLayout(self.orientLayout)
+		#self.orientLayout = QtWidgets.QHBoxLayout()
+		#self.orientLabel = QtWidgets.QLabel('Orientation:')
+		#self.xyRadio = QtWidgets.QRadioButton('XY')
+		#self.yzRadio = QtWidgets.QRadioButton('YZ')
+		#self.xzRadio = QtWidgets.QRadioButton('XZ')
+		#self.xyRadio.setChecked(True)
+		#self.orientLayout.addWidget(self.orientLabel)
+		#self.orientLayout.addWidget(self.xyRadio)
+		#self.orientLayout.addWidget(self.yzRadio)
+		#self.orientLayout.addWidget(self.xzRadio)
+		#self.mainLayout.addLayout(self.orientLayout)
 
 		colorLayout = QtWidgets.QHBoxLayout()
 		colorLabel = QtWidgets.QLabel('Color:')
@@ -57,30 +95,34 @@ class CurveControlCreator(QtWidgets.QDialog):
 		self.colorButtons = {}
 		colors = {
 			'Default': '#000080',
-			'LightBlue': '#00FFFF',
-			'Green': '#66FF66',
-			'Yellow': '#FFD700',
-			'Red': '#FF5050',
-			'Pink': '#FF0099'
-		
+			'LightBlue': '#5ffaff',
+			'Yellow': '#fff739',
+			'Red': '#ff3333',
+			'Pink': '#ff65d4'
 		}
-
+		i = 0
 		for name, hexval in colors.items():
 			btn = QtWidgets.QPushButton()
-			btn.setFixedSize(60, 25)
-			btn.setStyleSheet(f'background-color:{hexval}; border:2px solid #888; border-radius:5px;')
+			btn.setFixedSize(70, 22)
+			btn.setStyleSheet(f'background-color:{hexval}; border:1px solid #666; border-radius:4px;')
 			btn.setCheckable(True)
-			self.colorGroup.addButton(btn)
-			self.colorButtons[btn] = name
+			self.colorGroup.addButton(btn, id=i)
+			self.colorButtons[i] = name
 			colorLayout.addWidget(btn)
+			i += 1
+
+		firstBtn = self.colorGroup.button(0)
+		if firstBtn:
+			firstBtn.setChecked(True)
 
 		self.mainLayout.addLayout(colorLayout)
+		self.mainLayout.addStretch()
 
 		self.scaleLayout = QtWidgets.QHBoxLayout()
 		self.scaleLabel = QtWidgets.QLabel('Scale:')
 		self.scaleSlider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
 		self.scaleSlider.setMinimum(1)
-		self.scaleSlider.setMaximum(10)
+		self.scaleSlider.setMaximum(100)
 		self.scaleSlider.setValue(10)
 		self.scaleValueLabel = QtWidgets.QLabel('10.0')
 		self.scaleLayout.addWidget(self.scaleLabel)
@@ -88,18 +130,63 @@ class CurveControlCreator(QtWidgets.QDialog):
 		self.scaleLayout.addWidget(self.scaleValueLabel)
 		self.mainLayout.addLayout(self.scaleLayout)
 
-		self.freezeCheck = QtWidgets.QCheckBox('Freeze Transform')
-		self.groupCheck = QtWidgets.QCheckBox('Create Group (_grp)')
-		self.mainLayout.addWidget(self.freezeCheck)
-		self.mainLayout.addWidget(self.groupCheck)
-
 		self.buttonLayout = QtWidgets.QHBoxLayout()
 		self.mainLayout.addLayout(self.buttonLayout)
 		self.createButton = QtWidgets.QPushButton('Create🪄')
+		self.createButton.setStyleSheet(
+			'''
+				QPushButton {
+					background-color: #266d95;
+					border-radius: 12px;
+					padding: 4px;
+				}
+				QPushButton:hover {
+					background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #a7eaf9, stop:1 #4f97c0);
+					color: Black; 
+				}
+				QPushButton:pressed {
+					background-color: black;
+				}
+			'''
+		)
 		self.cancelButton = QtWidgets.QPushButton('Cancel❌')
+		self.cancelButton.setStyleSheet(
+			'''
+				QPushButton {
+					background-color: #af3110;
+					border-radius: 12px;
+					padding: 4px;
+				}
+				QPushButton:hover {
+					background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #ffd285, stop:1 #c24524);
+					color: Black; 
+				}
+				QPushButton:pressed {
+					background-color: black;
+				}
+			'''
+		)
 		self.buttonLayout.addWidget(self.createButton)
 		self.buttonLayout.addWidget(self.cancelButton)
+		self.mainLayout.addLayout(self.buttonLayout)
 
+		self.currentCtrl = None
+		self.currentGrp = None
+
+		self.createButton.clicked.connect(self.onClickCreateCurveControl)
+		self.cancelButton.clicked.connect(self.close)	
+
+	def onClickCreateCurveControl(self):
+		import curveControlCreator.curveControlCreatorUtil as ccutil
+		name = self.nameLineEdit.text()
+		shape = self.shapeCombo.currentText()
+
+		if not name:
+			QtWidgets.QMessageBox.warning(self, "Missing Name", "Please enter a name.")
+			return
+
+		grp, ctrl = ccutil.createCurveControl(name, shape)
+		
 def run():
 	global ui
 	try:
