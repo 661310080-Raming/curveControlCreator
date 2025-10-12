@@ -1,2 +1,6 @@
 __pycache__
 *.pyc
+
+curveClass_files
+*.css
+*.html
