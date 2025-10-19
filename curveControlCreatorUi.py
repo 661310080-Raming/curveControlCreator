@@ -76,22 +76,13 @@ class CurveControlCreator(QtWidgets.QDialog):
 		self.shapeLayout.addWidget(self.shapeCombo)
 		self.mainLayout.addLayout(self.shapeLayout)
 
-		#self.orientLayout = QtWidgets.QHBoxLayout()
-		#self.orientLabel = QtWidgets.QLabel('Orientation:')
-		#self.xyRadio = QtWidgets.QRadioButton('XY')
-		#self.yzRadio = QtWidgets.QRadioButton('YZ')
-		#self.xzRadio = QtWidgets.QRadioButton('XZ')
-		#self.xyRadio.setChecked(True)
-		#self.orientLayout.addWidget(self.orientLabel)
-		#self.orientLayout.addWidget(self.xyRadio)
-		#self.orientLayout.addWidget(self.yzRadio)
-		#self.orientLayout.addWidget(self.xzRadio)
-		#self.mainLayout.addLayout(self.orientLayout)
-
 		colorLayout = QtWidgets.QHBoxLayout()
 		colorLabel = QtWidgets.QLabel('Color:')
 		colorLayout.addWidget(colorLabel)
-		self.colorGroup = QtWidgets.QButtonGroup()
+
+		self.colorGroup = QtWidgets.QButtonGroup(self)
+		self.colorGroup.setExclusive(True)
+
 		self.colorButtons = {}
 		colors = {
 			'Default': '#000080',
@@ -100,12 +91,22 @@ class CurveControlCreator(QtWidgets.QDialog):
 			'Red': '#ff3333',
 			'Pink': '#ff65d4'
 		}
+
 		i = 0
 		for name, hexval in colors.items():
 			btn = QtWidgets.QPushButton()
 			btn.setFixedSize(70, 22)
-			btn.setStyleSheet(f'background-color:{hexval}; border:1px solid #666; border-radius:4px;')
 			btn.setCheckable(True)
+			btn.setStyleSheet(f'''
+				QPushButton {{
+					background-color: {hexval};
+					border: 1px solid #666;
+					border-radius: 4px;
+				}}
+				QPushButton:checked {{
+					border: 2px solid white;
+				}}
+			''')
 			self.colorGroup.addButton(btn, id=i)
 			self.colorButtons[i] = name
 			colorLayout.addWidget(btn)
@@ -116,7 +117,6 @@ class CurveControlCreator(QtWidgets.QDialog):
 			firstBtn.setChecked(True)
 
 		self.mainLayout.addLayout(colorLayout)
-		self.mainLayout.addStretch()
 
 		self.scaleLayout = QtWidgets.QHBoxLayout()
 		self.scaleLabel = QtWidgets.QLabel('Scale:')
@@ -124,6 +124,7 @@ class CurveControlCreator(QtWidgets.QDialog):
 		self.scaleSlider.setMinimum(1)
 		self.scaleSlider.setMaximum(100)
 		self.scaleSlider.setValue(10)
+		self.scaleSlider.valueChanged.connect(self.onScaleSlider)
 		self.scaleValueLabel = QtWidgets.QLabel('10.0')
 		self.scaleLayout.addWidget(self.scaleLabel)
 		self.scaleLayout.addWidget(self.scaleSlider)
@@ -168,24 +169,39 @@ class CurveControlCreator(QtWidgets.QDialog):
 		)
 		self.buttonLayout.addWidget(self.createButton)
 		self.buttonLayout.addWidget(self.cancelButton)
-		self.mainLayout.addLayout(self.buttonLayout)
 
-		self.currentCtrl = None
-		self.currentGrp = None
+		self.buttomLayout = QtWidgets.QHBoxLayout()
+		self.mainLayout.addLayout(self.buttomLayout)
+		self.freezeButton = QtWidgets.QPushButton('Freeze Translate📍')
+		self.freezeButton.setEnabled(False)
+		self.buttomLayout.addWidget(self.freezeButton)
 
 		self.createButton.clicked.connect(self.onClickCreateCurveControl)
-		self.cancelButton.clicked.connect(self.close)	
+		self.cancelButton.clicked.connect(self.close)
+
+	def onScaleSlider(self, value):
+		scale_value = value / 10.0
+		self.scaleValueLabel.setText(f"{scale_value:.1f}")
 
 	def onClickCreateCurveControl(self):
 		import curveControlCreator.curveControlCreatorUtil as ccutil
 		name = self.nameLineEdit.text()
 		shape = self.shapeCombo.currentText()
+		scale_value = self.scaleSlider.value() / 10.0
+
+		color_id = self.colorGroup.checkedId()
+		color_name = self.colorButtons[color_id]
 
 		if not name:
 			QtWidgets.QMessageBox.warning(self, "Missing Name", "Please enter a name.")
 			return
+		
+		grp, ctrl = ccutil.createCurveControl(name, shape, scale=scale_value, color=color_name)
 
-		grp, ctrl = ccutil.createCurveControl(name, shape)
+		if ctrl:
+			self.freezeButton.setEnabled(True)
+			self.currentCtrl = ctrl
+			self.currentGrp = grp
 		
 def run():
 	global ui

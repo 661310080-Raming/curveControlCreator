@@ -15,23 +15,21 @@ class Curve:
 		star_cmd = 'curve -d 1 -p 0 0 3 -p 1 0 1 -p 3 0 0 -p 1 0 -1 -p 0 0 -3 -p -1 0 -1 -p -3 0 0 -p -1 0 1 -p 0 0 3 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8'
 
 		self.curveCmd = {
-			'Circle': circle_cmd,
-			'Square': square_cmd,
-			'Arrow1': arrow1_cmd,
-			'Arrow2': arrow2_cmd,
-			'Arrow3': arrow3_cmd,
-			'Cube': cube_cmd,
-			'Sphere': sphere_cmd,
-			'Star': star_cmd
+			'⭕Circle': circle_cmd,
+			'🔳Square': square_cmd,
+			'➡️Arrow1': arrow1_cmd,
+			'🔛Arrow2': arrow2_cmd,
+			'➕Arrow3': arrow3_cmd,
+			'🧊Cube': cube_cmd,
+			'🌐Sphere': sphere_cmd,
+			'✨Star': star_cmd
 		}
 
-		if self.curveCmd.get(self.curveFormat):
-			curve_shape = mel.eval(self.curveCmd[self.curveFormat])
-			
-			if isinstance(curve_shape, list):
-				curve_shape = curve_shape[0]
-				self.name = cmds.rename(curve_shape, name)
-				print(f'✅ Created curve: {self.name}')
-				
-		else:
-			cmds.warning(f'"{self.curveFormat}" not found in curve command list.')
+		if curveFormat not in self.curveCmd:
+			cmds.warning(f'Unknown curve type: {curveFormat}')
+			return
+
+		result = mel.eval(self.curveCmd[curveFormat])
+		transform = result[0] if isinstance(result, list) else result
+		self.name = cmds.rename(transform, name)
+		print(f'✅ Created {curveFormat} curve: {self.name}')
