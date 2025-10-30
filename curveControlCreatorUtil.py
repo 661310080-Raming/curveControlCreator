@@ -18,8 +18,8 @@ def createCurveControl(base_name, shape, scale=1.0, createGroup=True, color=None
 		return None, None
 	target_joint = sel[0]
 
-	base_ctrl_name = f'{base_name}_ctrl'
-	base_grp_name = f'{base_name}_ctrl_grp'
+	base_ctrl_name = f'{base_name}_CC'
+	base_grp_name = f'{base_name}_CC_grp'
 
 	ctrl_name = base_ctrl_name
 	grp_name = base_grp_name
