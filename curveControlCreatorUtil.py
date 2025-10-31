@@ -63,3 +63,7 @@ def setCurveColor(ctrl, color):
 	for shape in shapes:
 		cmds.setAttr(shape + ".overrideEnabled", 1)
 		cmds.setAttr(shape + ".overrideColor", color_id)
+
+def freeze_transform(target):
+	if target and cmds.objExists(target):
+		cmds.makeIdentity(target, apply=True, translate=True, rotate=True, scale=True, normal=False)

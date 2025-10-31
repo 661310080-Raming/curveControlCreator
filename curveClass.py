@@ -18,8 +18,8 @@ class Curve:
 			'⭕Circle': circle_cmd,
 			'🔳Square': square_cmd,
 			'➡️Arrow1': arrow1_cmd,
-			'🔛Arrow2': arrow2_cmd,
-			'➕Arrow3': arrow3_cmd,
+			'➕Arrow2': arrow2_cmd,
+			'🔛Arrow3': arrow3_cmd,
 			'🧊Cube': cube_cmd,
 			'🌐Sphere': sphere_cmd,
 			'✨Star': star_cmd
